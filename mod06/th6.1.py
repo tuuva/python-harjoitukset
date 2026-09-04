@@ -1,6 +1,6 @@
 import random 
 
-määrä = int(input("Kuinka monta arpakuutiota heitetään? "))
+määrä = int(input("Kuinka monta arpakuutiota heitetään?: "))
 
 summa = 0
 

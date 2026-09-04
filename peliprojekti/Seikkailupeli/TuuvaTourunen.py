@@ -1,8 +1,8 @@
 ##Peliprojekti
 
-ikä = int(input("mikä on ikäsi? "))
+ikä = int(input("Kuinka vanha olet?: "))
 
-käyttäjänimi = str(input("mika on nimesi? "))
+käyttäjänimi = str(input("Mikä on nimesi?: "))
 
 print(f"pelaajan nimi on {käyttäjänimi}, ja ikä {ikä}")
 
@@ -29,5 +29,3 @@ while True:
         print("Peli alkaa!")
     elif komento == "ohjeet":
         print("Tässä pelissä sinun tehtäväsi on voittaa!")
-
-    
