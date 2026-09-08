@@ -1,5 +1,4 @@
 
-
 def lasku(luvut):
     summa = sum(luvut) 
     return summa
