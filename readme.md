@@ -19,3 +19,11 @@ Tein tehtävät + projekti 2
 ## Moduuli 6
 
 Tein tehtävät
+
+## Moduuli 7
+
+Tein tehtävät + projekti 3
+
+## Moduuli 8
+
+Tein tehtävät
