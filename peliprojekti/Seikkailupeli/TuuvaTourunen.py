@@ -43,16 +43,15 @@ def pelaa():
               print("Kuljet vasenta polkua pitkin.")
               print("Hetken päästä löydät salaisen luolan")
               print("Luolan edessä seisoo vanha velho, hän näyttää väsyneeltä ja pyytää apuasi.")
-              print("'Tarvitsen apuasi. Olen menettänyt taikasauvani luolaan.'")
+              print("'Tarvitsen apuasi'")
               print("1. Lupaan auttaa velhoa")
               print("2. Jatkan matkaa")
 
          elif polku == "2":
               print("Kuljet oikeaa polkua pitkin.")
               print("Tulet vanhalle sillalle.") 
-              print("Sillalla makaa haavoittunut mies.")
-              print("Hän nostaa katseensa ja sanoo:")
-              print("'Auta minut pois täältä, niin annan sinulle jotain arvokasta.'")
+              print("Sillalla makaa haavoittunut henkilö.")
+              print("Hän pyytää apuasi")
               print("1. Autan häntä")
               print("2. Jatkan matkaa")
 
