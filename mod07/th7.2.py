@@ -1,6 +1,5 @@
 import random
 
-
 def nopanheitto(tahkot):
     heitto = random.randint(1,tahkot)
     return heitto

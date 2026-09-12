@@ -6,6 +6,7 @@ while tuuma >= 0:
     if tuuma < 0:
         break
     print(f"{tuuma}")
+    
     cm = float(input("Anna senttimetrit: "))
     
     print("Luku on negatiivinen")

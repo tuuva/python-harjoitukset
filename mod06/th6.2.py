@@ -12,5 +12,5 @@ luvut.sort(reverse=True)
 print("5 suurinta lukua suuruusjärjestyksessä: ")
 
 for i in range(5):
-    print(luvut[i])
+    print(luvut)
 

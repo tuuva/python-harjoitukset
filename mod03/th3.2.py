@@ -4,7 +4,7 @@ import math
 circle_radius_input = float(input("Anna säteen pituus senttimetreinä "))
 radius_float = float(circle_radius_input)
 
-## Laske ymoyrän pinta-ala
+## Laske ympyrän pinta-ala
 ## pi * säde potenssiin kaksi
 area = (math.pi * radius_float**2)
 

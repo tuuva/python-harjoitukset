@@ -21,7 +21,7 @@ def pelaa():
 
     nayta_esineet()
 
-    if "avain" in esineet:
+    if "3" or "avain" in esineet:
          print("Käytät avainta ja avaat oven!")
          print("Oven takana on pimeä huone.")
          print("Astut sisään, kun yhtäkkiä lattia alkaa sortua!")
@@ -42,8 +42,7 @@ def pelaa():
          if polku == "1":
               print("Kuljet vasenta polkua pitkin.")
               print("Hetken päästä löydät salaisen luolan")
-              print("Luolan edessä seisoo vanha velho, hän näyttää väsyneeltä ja pyytää apuasi.")
-              print("'Tarvitsen apuasi'")
+              print("Luolan edessä seisoo vanha velho, joka pyytää apuasi.")
               print("1. Lupaan auttaa velhoa")
               print("2. Jatkan matkaa")
 
