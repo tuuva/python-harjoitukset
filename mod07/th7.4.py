@@ -1,11 +1,19 @@
 
-def lasku(luvut):
-    summa = sum(luvut) 
+def summa(luvut):
+    summa = 0
+    for luku in luvut:
+        summa += luku
     return summa
 
+lista = []
 
-lista = [1,5,6,8]
+luku = input("Anna luku (tyhjä lopettaa): ")
 
-summa = lasku(lista)
+while luku != "":
+    lista.append(int(luku))
+    luku = input("Anna luku: ")
 
-print(summa)
+tulos = summa(lista)
+print(f"Summa on: {tulos}")
+
+
