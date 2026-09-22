@@ -3,6 +3,7 @@ import random
 random_number=random.randint(0, 9)
 random_number01=random.randint(0, 9)
 random_number02=random.randint(0, 9)
+
 print(random_number)
 print(random_number01)
 print(random_number02)

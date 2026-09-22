@@ -1,0 +1,50 @@
+
+
+class Hissi:
+    def __init__(self, alin, ylin):
+        self.alin = alin
+        self.ylin = ylin
+        self.nykyinen = alin
+
+    def siirry_kerrokseen(self, kerros):
+        while self.nykyinen != kerros:
+            if self.nykyinen < kerros:
+                self.kerros_ylös()
+            else:
+                self.kerros_alas()
+
+    def kerros_ylös(self):
+        if self.nykyinen + 1 >= self.ylin:
+            self.nykyinen = self.ylin
+        self.nykyinen += 1
+        print(f"Nykyinen kerros: {self.nykyinen}")
+
+    def kerros_alas(self):
+        if self.nykyinen -1 <= self.alin:
+            self.nykyinen = self.alin
+        else:
+            self.nykyinen -= 1
+        print(f"Nykyinen kerros: {self.nykyinen}")
+
+class Talo:
+
+    def __init__(self, alin, ylin, hissien_määrä):
+        self.alin = alin
+        self.ylin = ylin
+        self.hissit = []
+        for i in range(hissien_määrä):
+            self.hissit.append(Hissi(alin, ylin))
+
+    def aja_hissiä(self, hissin_numero, kerros):
+        self.hissit[hissin_numero].siirry_kerrokseen(kerros)
+
+    def palohälytys(self):
+        for hissi in self.hissit:
+            hissi.siirry_kerrokseen(1)
+        print(f"Palohälytys, siirry alimpaan kerrokseen")
+
+talo1 = Talo(1, 10, 3)
+talo1.aja_hissiä(2, 4)
+talo1.palohälytys()
+
+
