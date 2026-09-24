@@ -14,9 +14,12 @@ class Sähköauto(Auto):
         self.akkukapasiteetti = akkukapasiteetti
 
     def tulosta_tiedot(self):
-        print(f"sähköauton rekisteritunnus: {self.rekisteritunnus}, huippunopeus: {self.huippunopeus} km/h, akkukapasiteetti: {self.akkukapasiteetti} kWh")
+        print("")
+        print(f"Sähköauton rekisteritunnus: {self.rekisteritunnus}, huippunopeus: {self.huippunopeus} km/h, akkukapasiteetti: {self.akkukapasiteetti} kWh")
+        print("")
         print(f"auton tämänhetkinen nopeus: {self.tämänhetkinen_nopeus} kmh")
-        print(f"matramittarin lukema: {self.matkamittari}")
+        print("")
+        print(f"matramittarin lukema: {self.matkamittari} km")
 
 class Polttomoottoriauto(Auto):
     def __init__(self, rekisteritunnus, huippunopeus, bensatankin_koko):
@@ -24,9 +27,13 @@ class Polttomoottoriauto(Auto):
         self.bensatankin_koko = bensatankin_koko
 
     def tulosta_tiedot(self):
-        print(f"polttomoottoriauton rekisteritunnus: {self.rekisteritunnus}, bensatankin koko: {self.bensatankin_koko} litraa, huippunopeus: {self.huippunopeus} km/h")
+        print("")
+        print("")
+        print(f"Polttomoottoriauton rekisteritunnus: {self.rekisteritunnus}, bensatankin koko: {self.bensatankin_koko} litraa, huippunopeus: {self.huippunopeus} km/h")
+        print("")
         print(f"auton tämänhetkinen nopeus: {self.tämänhetkinen_nopeus} km/h")
-        print(f"matkamittarin lukema: {self.matkamittari}")
+        print("")
+        print(f"matkamittarin lukema: {self.matkamittari} km")
 
 auto1 = Sähköauto("ABC-15", 180, 52.5)
 auto1.tämänhetkinen_nopeus = 60
