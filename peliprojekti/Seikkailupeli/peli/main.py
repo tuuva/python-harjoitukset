@@ -3,60 +3,20 @@ from esine import Esine
 from huone import Huone
 import json
 
+
 def lue_tekstitiedosto():
     try:
         with open("peliprojekti/Seikkailupeli/peli/intro.txt", "r", encoding="utf-8") as tiedosto:
             print(tiedosto.read())
-        
+
         with open("peliprojekti/Seikkailupeli/peli/ohjeet.txt", "r", encoding="utf-8") as tiedosto:
             print(tiedosto.read())
 
     except FileNotFoundError:
         print("Tiedostoa ei löydy.")
-        
+
     except IOError:
         print("Tiedoston käsittelyssä tapahtui virhe.")
-
-def luo_peli():
-
-    # Esineet
-    radiopuhelin = Esine("Radiopuhelin")
-    kartta = Esine("Kartta")
-    taskulamppu = Esine("Taskulamppu")
-    kompassi = Esine("Kompassi")
-
-    # Paikat
-    lentokentta = Huone("Lentokenttä")
-    mokki = Huone("Tutkijan mökki")
-    laboratorio = Huone("Laboratorio")
-    majakka = Huone("Majakka")
-
-    # Esineet lentokentälle
-    lentokentta.lisää_esine(radiopuhelin)
-    lentokentta.lisää_esine(kartta)
-    lentokentta.lisää_esine(taskulamppu)
-    lentokentta.lisää_esine(kompassi)
-
-    # Pelaajan nimi
-    nimi = input("Mikä on nimesi?: ")
-
-    lue_tekstitiedosto()
-
-
-    # Pelaaja aloittaa lentokentältä
-    pelaaja = Pelaaja(nimi, lentokentta)
-
-    return pelaaja, mokki, laboratorio, majakka
-
-
-def valikko():
-
-    print("\n--- VALIKKO ---")
-    print("1. Tutki paikkaa")
-    print("2. Liiku")
-    print("3. Näytä omat esineet")
-    print("4. Tallenna peli")
-    print("5. Lopeta")
 
 
 def tallenna_peli(pelaaja):
@@ -67,7 +27,6 @@ def tallenna_peli(pelaaja):
         "esineet": []
     }
 
-    # Tallennetaan pelaajan esineet
     for esine in pelaaja.esineet:
         tallennus["esineet"].append(esine.nimi)
 
@@ -84,6 +43,102 @@ def tallenna_peli(pelaaja):
 
     except IOError:
         print("Pelin tallentaminen epäonnistui.")
+
+
+def lataa_peli(nimi, lentokentta, mokki, laboratorio, majakka):
+
+    try:
+        with open("save.json", "r", encoding="utf-8") as tiedosto:
+            tallennus = json.load(tiedosto)
+
+    except FileNotFoundError:
+        return None
+
+    except json.JSONDecodeError:
+        return None
+
+    if tallennus["nimi"] != nimi:
+        return None
+
+    print("\nVanha tallennus löytyi!")
+
+    vastaus = input("Haluatko jatkaa vanhaa peliä? (k/e): ")
+
+    if vastaus.lower() != "k":
+        return None
+
+    if tallennus["sijainti"] == "Lentokenttä":
+        sijainti = lentokentta
+
+    elif tallennus["sijainti"] == "Tutkijan mökki":
+        sijainti = mokki
+
+    elif tallennus["sijainti"] == "Laboratorio":
+        sijainti = laboratorio
+
+    elif tallennus["sijainti"] == "Majakka":
+        sijainti = majakka
+
+    else:
+        sijainti = lentokentta
+
+    pelaaja = Pelaaja(nimi, sijainti)
+
+    for esineen_nimi in tallennus["esineet"]:
+        esine = Esine(esineen_nimi)
+        pelaaja.kerää_esine(esine)
+
+    return pelaaja
+
+
+def luo_peli():
+
+    # Esineet
+    radiopuhelin = Esine("Radiopuhelin")
+    kartta = Esine("Kartta")
+    taskulamppu = Esine("Taskulamppu")
+    kompassi = Esine("Kompassi")
+
+    lentokentta = Huone("Lentokenttä")
+    mokki = Huone("Tutkijan mökki")
+    laboratorio = Huone("Laboratorio")
+    majakka = Huone("Majakka")
+
+    lentokentta.lisää_esine(radiopuhelin)
+    lentokentta.lisää_esine(kartta)
+    lentokentta.lisää_esine(taskulamppu)
+    lentokentta.lisää_esine(kompassi)
+
+    nimi = input("Mikä on nimesi?: ")
+
+    vanha_peli = lataa_peli(
+        nimi,
+        lentokentta,
+        mokki,
+        laboratorio,
+        majakka
+    )
+
+    if vanha_peli is not None:
+        return vanha_peli, mokki, laboratorio, majakka
+
+    print("\nAloitetaan uusi peli.")
+
+    lue_tekstitiedosto()
+
+    pelaaja = Pelaaja(nimi, lentokentta)
+
+    return pelaaja, mokki, laboratorio, majakka
+
+
+def valikko():
+
+    print("\n--- VALIKKO ---")
+    print("1. Tutki paikkaa")
+    print("2. Liiku")
+    print("3. Näytä omat esineet")
+    print("4. Tallenna peli")
+    print("5. Lopeta")
 
 
 def ota_esine(pelaaja):
@@ -152,7 +207,6 @@ def pelaa():
 
         valinta = input("Valitse toiminto: ")
 
-        # Tutki paikkaa
         if valinta == "1":
 
             pelaaja.sijainti.näytä_esineet()
@@ -166,7 +220,6 @@ def pelaa():
                 if vastaus.lower() == "k":
                     ota_esine(pelaaja)
 
-        # Liiku
         elif valinta == "2":
 
             liiku(
@@ -176,23 +229,19 @@ def pelaa():
                 majakka
             )
 
-        # Näytä omat esineet
         elif valinta == "3":
 
             pelaaja.näytä_esineet()
 
-        # Tallenna peli
         elif valinta == "4":
 
             tallenna_peli(pelaaja)
 
-        # Lopeta
         elif valinta == "5":
 
             print("Peli lopetetaan.")
             break
 
-        # Väärä valinta
         else:
 
             print("Virheellinen valinta.")
