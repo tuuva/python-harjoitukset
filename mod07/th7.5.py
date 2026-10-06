@@ -16,6 +16,4 @@ parilliset = vain_parilliset(luvut)
 print(f"lista {luvut}")
 print(f"karsittu lista {parilliset}")
 
-
-
     
