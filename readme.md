@@ -37,6 +37,26 @@ Tein tehtävät
 Tein tehtävät
 
 ## Moduuli 11
+<<<<<<< HEAD
+=======
+
+Tein tehtävät
+
+## Moduuli 12
+
+## Projektin rakenne
+
+Projekti on jaettu useaan moduuliin, ja yhteen pakettiin.
+
+- `main.py` sisältää pelin pääohjelman, valikon ja pelin toiminnallisuuden.
+- `pelaaja.py` sisältää `Pelaaja`-luokan ja pelaajaan liittyvät toiminnot.
+- `huone.py` sisältää `Huone`-luokan ja huoneisiin liittyvät toiminnot.
+- `esine.py` sisältää `Esine`-luokan ja esineisiin liittyvät ominaisuudet.
+
+Nämä moduulit muodostavat projektin rakenteen, ja `main.py` tuo tarvittavat luokat käyttöön import-lauseilla.
+
+
+>>>>>>> b0a97797e2e2df0fefbb1d9f319eb3a5eb27b4ef
 
 Tein tehtävät 
 

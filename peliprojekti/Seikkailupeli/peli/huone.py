@@ -14,3 +14,4 @@ class Huone:
 
             for numero, esine in enumerate(self.esineet, 1):
                 print(f"{numero}. {esine}")
+                

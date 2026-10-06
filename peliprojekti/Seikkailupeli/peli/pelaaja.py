@@ -1,8 +1,9 @@
 class Pelaaja:
+
     def __init__(self, nimi, sijainti):
         self.nimi = nimi
-        self.esineet = []
         self.sijainti = sijainti
+        self.esineet = []
 
     def kerää_esine(self, esine):
         self.esineet.append(esine)
@@ -10,13 +11,20 @@ class Pelaaja:
 
     def liiku(self, huone):
         self.sijainti = huone
-        print(f"Siirryit huoneeseen: {huone.nimi}")
+        print(f"Siirryit paikkaan: {huone.nimi}")
 
     def näytä_esineet(self):
-        print("\nMukanasi olevat esineet:")
+        print("\n--- MUKANASI OLEVAT ESINEET ---")
 
         if len(self.esineet) == 0:
-            print("- Ei esineitä")
+            print("Sinulla ei ole esineitä.")
         else:
-            for esine in self.esineet:
-                print(f"- {esine}")
+            for numero, esine in enumerate(self.esineet, 1):
+                print(f"{numero}. {esine.nimi}")
+
+    def onko_esine(self, esineen_nimi):
+        for esine in self.esineet:
+            if esine.nimi.lower() == esineen_nimi.lower():
+                return True
+
+        return False
