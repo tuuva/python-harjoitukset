@@ -1,5 +1,5 @@
 
-# Tuodaan muiden moduulien luokat ja JSON-kirjasto käyttöön.
+
 from pelaaja import Pelaaja
 from huone import Huone
 from esine import Esine
@@ -12,7 +12,6 @@ def lue_intro():
         with open("peliprojekti/Seikkailupeli/peli/intro.txt", "r", encoding="utf-8") as tiedosto:
             print(tiedosto.read())
 
-    # Käsitellään mahdolliset tiedostovirheet.
     except FileNotFoundError:
         print("Intro-tiedostoa ei löydy.")
 
@@ -36,10 +35,8 @@ def lue_ohjeet():
 # Kysytään nimeä niin kauan, että se on hyväksyttävä.
 def kysy_nimi():
     while True:
-        # strip() poistaa ylimääräiset välilyönnit alusta ja lopusta.
         nimi = input("Mikä on nimesi? ").strip()
 
-        # Tarkistetaan, ettei nimi ole tyhjä, liian pitkä tai sisällä numeroita.
         if nimi and len(nimi) <= 50 and nimi.replace(" ", "").replace("-", "").isalpha():
             return nimi
 
@@ -50,7 +47,6 @@ def kysy_nimi():
 def kysy_ika():
     while True:
         try:
-            # int() muuttaa käyttäjän syötteen kokonaisluvuksi.
             ika = int(input("Kuinka vanha olet? "))
 
             if ika < 6:
@@ -62,10 +58,9 @@ def kysy_ika():
                 return None
 
             else:
-                # Hyväksytty ikä palautetaan pääohjelmalle.
+                
                 return ika
 
-        # Jos ikään syötetään esimerkiksi kirjaimia, kysytään uudelleen.
         except ValueError:
             print("Anna ikä numeroina, esimerkiksi 20.")
 
@@ -73,7 +68,6 @@ def kysy_ika():
 # Tallennetaan pelaajan tiedot JSON-tiedostoon.
 def tallenna_peli(pelaaja, reitti):
 
-    # Kootaan tallennettavat tiedot sanakirjaan.
     tallennus = {
         "nimi": pelaaja.nimi,
         "ika": pelaaja.ika,
@@ -82,12 +76,10 @@ def tallenna_peli(pelaaja, reitti):
         "reitti": reitti
     }
 
-    # Käydään esinelista läpi ja tallennetaan esineiden nimet.
     for esine in pelaaja.esineet:
         tallennus["esineet"].append(esine.nimi)
 
     try:
-        # w tarkoittaa kirjoitustilaa ja korvaa aiemman tallennuksen.
         with open("save.json", "w", encoding="utf-8") as tiedosto:
             json.dump(tallennus, tiedosto, ensure_ascii=False, indent=4)
 
@@ -100,26 +92,22 @@ def tallenna_peli(pelaaja, reitti):
 # Tarkistetaan, löytyykö samalla nimellä aikaisempi tallennus.
 def lataa_peli(nimi, lentokentta):
     try:
-        # json.load() lukee tallennustiedoston Pythonin käyttöön.
         with open("save.json", "r", encoding="utf-8") as tiedosto:
             tallennus = json.load(tiedosto)
 
-    # Jos tiedosto puuttuu tai on virheellinen, palautetaan None.
     except (FileNotFoundError, json.JSONDecodeError, IOError):
         return None
 
-    # isinstance() tarkistaa, että tallennus on sanakirja.
     if not isinstance(tallennus, dict):
         return None
 
-    # Varmistetaan, että tallennettu nimi vastaa annettua nimeä.
     if tallennus.get("nimi") != nimi:
         return None
 
     print("\nAiemmat pelaajatiedot löytyivät!")
     print(f"Edellinen reitti: {tallennus.get('reitti', 'Ei tiedossa')}")
 
-    # Kysytään, haluaako pelaaja käyttää vanhoja tietoja.
+   
     while True:
         vastaus = input("Haluatko käyttää aiempia tietojasi? (k/e): ").strip().lower()
 
@@ -131,7 +119,6 @@ def lataa_peli(nimi, lentokentta):
     if vastaus == "e":
         return None
 
-    # Tarkistetaan myös tallennetun iän kelvollisuus.
     try:
         ika = int(tallennus.get("ika", ""))
 
@@ -142,19 +129,16 @@ def lataa_peli(nimi, lentokentta):
         print("Tallennetusta iästä puuttuu kelvollinen arvo.")
         return None
 
-    # Luodaan Pelaaja-olio vanhoilla tiedoilla.
     pelaaja = Pelaaja(nimi=nimi, sijainti=lentokentta, ika=ika)
 
-    # Haetaan tallennettu esinelista, oletuksena tyhjä lista.
+
     esineet = tallennus.get("esineet", [])
 
-    # Palautetaan esineet nimien perusteella takaisin Esine-olioiksi.
     if isinstance(esineet, list):
         for esineen_nimi in esineet:
             if isinstance(esineen_nimi, str):
                 pelaaja.kerää_esine(Esine(esineen_nimi))
 
-    # Palautetaan valmis Pelaaja-olio pääohjelmalle.
     return pelaaja
 
 
@@ -179,7 +163,6 @@ def valitse_reitti():
 
         valinta = input("Valitse 1, 2 tai 3: ").strip()
 
-        # Palautetaan hyväksytty valinta pääohjelmalle.
         if valinta == "1" or valinta == "2" or valinta == "3":
             return valinta
 
@@ -189,7 +172,6 @@ def valitse_reitti():
 # Ensimmäinen reitti: tutkijan mökki.
 def mokin_reitti(pelaaja, mokki):
 
-    # Kutsutaan Pelaaja-luokan metodia sijainnin muuttamiseen.
     pelaaja.liiku(mokki)
 
     print("\nMökissä näet pöydän ja kirjahyllyn.")
@@ -203,17 +185,14 @@ def mokin_reitti(pelaaja, mokki):
     else:
         print("\nKirjahyllystä löytyy tutkijan päiväkirja.")
 
-    # Tarkistetaan, ettei pelaajalla ole samaa esinettä ennestään.
     if not pelaaja.onko_esine("Päiväkirja"):
         mokki.lisää_esine(Esine("Päiväkirja"))
 
-        # Poimitaan esine huoneesta ja lisätään pelaajan listaan.
         pelaaja.kerää_esine(mokki.poimi_esine(1))
 
     print("Päiväkirjassa kerrotaan, että tutkija lähti majakalle.")
     print("Päätät seurata vihjettä.")
 
-    # Palautetaan suoritetun reitin nimi.
     return "Tutkijan mökin kautta"
 
 
@@ -233,7 +212,6 @@ def laboratorion_reitti(pelaaja, laboratorio):
     else:
         print("\nTutkimuspöydältä löytyy tutkimusraportti.")
 
-    # Lisätään tutkimusraportti vain, jos sitä ei vielä ole.
     if not pelaaja.onko_esine("Tutkimusraportti"):
         laboratorio.lisää_esine(Esine("Tutkimusraportti"))
         pelaaja.kerää_esine(laboratorio.poimi_esine(1))
@@ -272,7 +250,6 @@ def majakan_reitti(pelaaja, majakka):
 # Toinen vaihe: kaikki reitit johtavat majakalle.
 def tutki_majakkaa(pelaaja, majakka):
 
-    # Siirretään pelaaja majakalle, ellei hän ole jo siellä.
     if pelaaja.sijainti.nimi != "Majakka":
         pelaaja.liiku(majakka)
 
@@ -305,7 +282,6 @@ def tutki_kellaria():
 
     valinta = kysy_kaksi()
 
-    # Valinta muuttaa tarinaa, mutta molemmat johtavat tutkijan löytämiseen.
     if valinta == "1":
         print("\nTyöpöydällä on papereita energiantutkimuksesta.")
         print("Pöydän takaa kuuluu tutkijan ääni.")
@@ -340,7 +316,6 @@ def pelin_loppu(pelaaja, reitti, lentokentta):
     print("\n--- PALUU LENTOKENTÄLLE ---")
     print("Autat tutkijan turvallisesti takaisin lentokentälle.")
 
-    # Pelaajan sijainti muutetaan takaisin lentokentäksi.
     pelaaja.liiku(lentokentta)
 
     print("\n==========================")
@@ -348,7 +323,6 @@ def pelin_loppu(pelaaja, reitti, lentokentta):
     print("==========================")
     print(f"Ratkaisit pelin: {reitti}.")
 
-    # Tallennetaan pelaajan tiedot automaattisesti pelin päätyttyä.
     tallenna_peli(pelaaja, reitti)
 
 
@@ -358,7 +332,6 @@ def pelaa():
     lue_intro()
     lue_ohjeet()
 
-    # Luodaan neljä Huone-luokan oliota.
     lentokentta = Huone("Lentokenttä")
     mokki = Huone("Tutkijan mökki")
     laboratorio = Huone("Laboratorio")
@@ -366,14 +339,11 @@ def pelaa():
 
     nimi = kysy_nimi()
 
-    # Yritetään ladata aiemmin tallennettu Pelaaja-olio.
     pelaaja = lataa_peli(nimi, lentokentta)
 
-    # Jos tallennusta ei löytynyt, luodaan uusi pelaaja.
     if pelaaja is None:
         ika = kysy_ika()
 
-        # Jos ikä ei kelpaa, palautetaan False päävalikolle.
         if ika is None:
             print("Kirjattu ulos pelistä.")
             return False
@@ -382,7 +352,6 @@ def pelaa():
 
     valinta = valitse_reitti()
 
-    # Valinnan perusteella kutsutaan oikeaa reittifunktiota.
     if valinta == "1":
         reitti = mokin_reitti(pelaaja, mokki)
 
@@ -392,7 +361,6 @@ def pelaa():
     else:
         reitti = majakan_reitti(pelaaja, majakka)
 
-    # Kaikki kolme reittiä jatkavat samoihin loppuvaiheisiin.
     tutki_majakkaa(pelaaja, majakka)
     tutki_kellaria()
     pelin_loppu(pelaaja, reitti, lentokentta)
@@ -410,7 +378,6 @@ def paavalikko():
         valinta = input("Valitse: ").strip()
 
         if valinta == "1":
-            # Jos pelaa() palauttaa False, lopetetaan päävalikon silmukka.
             if pelaa() is False:
                 break
 
@@ -426,5 +393,4 @@ def paavalikko():
             print("Virheellinen valinta.")
 
 
-# Käynnistetään ohjelma kutsumalla päävalikkoa.
 paavalikko()
