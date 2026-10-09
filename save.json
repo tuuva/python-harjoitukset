@@ -1,7 +1,10 @@
 {
-    "nimi": "t",
-    "sijainti": "Tutkijan mökki",
+    "nimi": "ruu",
+    "ika": 20,
+    "sijainti": "Lentokenttä",
     "esineet": [
-        "Radiopuhelin"
-    ]
+        "Tutkimusraportti",
+        "Taskulamppu"
+    ],
+    "reitti": "Laboratorion kautta"
 }

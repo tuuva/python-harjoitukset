@@ -1,8 +1,9 @@
 class Pelaaja:
 
-    def __init__(self, nimi, sijainti):
+    def __init__(self, nimi, sijainti, ika):
         self.nimi = nimi
         self.sijainti = sijainti
+        self.ika = ika
         self.esineet = []
 
     def kerää_esine(self, esine):

@@ -1,14 +1,7 @@
 
-Lento 713
 
 Tervetuloa,
-olet matkustanut pienelle syrjäiselle saarelle, koska siellä työskennellyt tutkija on kadonnut.
-Hän on viimeisessä viestissään lähettänyt:
-"Jos joku tulee etsimään minua, älä usko kaikkea mitä laboratorio kertoo."
+olet matkustanut pienelle saarelle, koska siellä työskennellyt tutkija on kadonnut.
+Sinun tehtäväsi on löytää kadonnut tutkija.
+onnea matkaan!
 
-Sen jälkeen yhteys katkesi.
-Pelaaja lentää saarelle pienellä lentokoneella.
-Kun kone laskeutuu, lentäjä ei suostu jäämään saarelle.
-"Sinulla on kaksi tuntia. Sitten palaan hakemaan sinut."
-
-Kone lähtee.

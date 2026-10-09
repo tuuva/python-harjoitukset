@@ -1,4 +1,10 @@
 
-Sinun tehtäväsi on löytää kadonnut tutkija.
-Muista olla varovainen ja pidä silmäsi auki, 
-onnea matkaan!
+PELIN OHJEET
+
+--- Valitse päävalikosta Pelaa.
+Anna nimesi ja ikäsi tai käytä aiempia pelaajatietojasi.
+Valitse lentokentältä reitti, tutki paikkaa ja jatka majakalle.
+Vastaa kysymyksiin ja löydä tutkija. ---
+
+Pelin voi läpäistä kolmea eri reittiä.
+Pelaajan tiedot ja kerätyt esineet tallennetaan automaattisesti.

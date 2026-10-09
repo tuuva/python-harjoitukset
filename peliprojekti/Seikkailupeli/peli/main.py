@@ -1,9 +1,10 @@
 from pelaaja import Pelaaja
-from esine import Esine
 from huone import Huone
+from esine import Esine
 import json
 
 
+# Luetaan pelin aloitustarina tekstitiedostosta.
 def lue_intro():
     try:
         with open("peliprojekti/Seikkailupeli/peli/intro.txt", "r", encoding="utf-8") as tiedosto:
@@ -16,6 +17,7 @@ def lue_intro():
         print("Tiedoston lukemisessa tapahtui virhe.")
 
 
+# Luetaan pelin ohjeet tekstitiedostosta.
 def lue_ohjeet():
     try:
         with open("peliprojekti/Seikkailupeli/peli/ohjeet.txt", "r", encoding="utf-8") as tiedosto:
@@ -28,12 +30,47 @@ def lue_ohjeet():
         print("Tiedoston lukemisessa tapahtui virhe.")
 
 
-def tallenna_peli(pelaaja):
+# Kysytään nimi. Nimen tulee sisältää kirjaimia, ei numeroita.
+def kysy_nimi():
+    while True:
+        nimi = input("Mikä on nimesi? ").strip()
 
+        # Sallitaan kirjaimet, välilyönnit ja yhdysmerkit.
+        if nimi and len(nimi) <= 50 and nimi.replace(" ", "").replace("-", "").isalpha():
+            return nimi
+
+        print("Anna nimi kirjaimilla (esim. Anna-Maija), ei numeroilla.")
+
+
+# Tarkistetaan ikä. Ikärajan ulkopuolella pelaaminen lopetetaan.
+def kysy_ika():
+    while True:
+        try:
+            ika = int(input("Kuinka vanha olet? "))
+
+            if ika < 6:
+                print("Alaikäinen.")
+                return None
+
+            elif ika > 110:
+                print("Virheellinen ikä.")
+                return None
+
+            else:
+                return ika
+
+        except ValueError:
+            print("Anna ikä numeroina, esimerkiksi 20.")
+
+
+# Tallennetaan pelaajan tiedot JSON-tiedostoon.
+def tallenna_peli(pelaaja, reitti):
     tallennus = {
         "nimi": pelaaja.nimi,
+        "ika": pelaaja.ika,
         "sijainti": pelaaja.sijainti.nimi,
-        "esineet": []
+        "esineet": [],
+        "reitti": reitti
     }
 
     for esine in pelaaja.esineet:
@@ -41,560 +78,272 @@ def tallenna_peli(pelaaja):
 
     try:
         with open("save.json", "w", encoding="utf-8") as tiedosto:
-            json.dump(
-                tallennus,
-                tiedosto,
-                ensure_ascii=False,
-                indent=4
-            )
-
-        print("\nPeli tallennettu.")
-
+            json.dump(tallennus, tiedosto, ensure_ascii=False, indent=4)
+        print("\nPelaajan tiedot tallennettu.")
     except IOError:
-        print("\nPelin tallentaminen epäonnistui.")
+        print("Tietojen tallentaminen epäonnistui.")
 
 
-def lataa_peli(nimi, lentokentta, mokki, laboratorio, majakka):
-
+# Tarkistetaan, löytyykö samalla nimellä aikaisempi tallennus.
+def lataa_peli(nimi, lentokentta):
     try:
         with open("save.json", "r", encoding="utf-8") as tiedosto:
             tallennus = json.load(tiedosto)
-
-    except FileNotFoundError:
+    except (FileNotFoundError, json.JSONDecodeError, IOError):
         return None
 
-    except json.JSONDecodeError:
+    # Virheellistä tallennustiedostoa ei yritetä käsitellä.
+    if not isinstance(tallennus, dict):
         return None
 
-    if tallennus["nimi"] != nimi:
+    if tallennus.get("nimi") != nimi:
         return None
 
-    print("\nVanha tallennus löytyi!")
+    print("\nAiemmat pelaajatiedot löytyivät!")
+    print(f"Edellinen reitti: {tallennus.get('reitti', 'Ei tiedossa')}")
+    while True:
+        vastaus = input("Haluatko käyttää aiempia tietojasi? (k/e): ").strip().lower()
+        if vastaus == "k" or vastaus == "e":
+            break
+        print("Vastaa k tai e.")
 
-    vastaus = input("Haluatko jatkaa vanhaa peliä? (k/e): ")
-
-    if vastaus.lower() != "k":
+    if vastaus == "e":
         return None
 
-    if tallennus["sijainti"] == "Lentokenttä":
-        sijainti = lentokentta
+    # Tarkistetaan myös vanhan tallennuksen ikä.
+    try:
+        ika = int(tallennus.get("ika", ""))
+        if not 6 <= ika <= 100:
+            raise ValueError
+    except (ValueError, TypeError):
+        print("Tallennetusta iästä puuttuu kelvollinen arvo.")
+        return None
 
-    elif tallennus["sijainti"] == "Tutkijan mökki":
-        sijainti = mokki
-
-    elif tallennus["sijainti"] == "Laboratorio":
-        sijainti = laboratorio
-
-    elif tallennus["sijainti"] == "Majakka":
-        sijainti = majakka
-
-    else:
-        sijainti = lentokentta
-
-    pelaaja = Pelaaja(nimi, sijainti)
-
-    for esineen_nimi in tallennus["esineet"]:
-        esine = Esine(esineen_nimi)
-        pelaaja.kerää_esine(esine)
+    # Pelaaja aloittaa uuden seikkailun, mutta säilyttää tietonsa ja esineensä.
+    pelaaja = Pelaaja(nimi=nimi, sijainti=lentokentta, ika=ika)
+    esineet = tallennus.get("esineet", [])
+    if isinstance(esineet, list):
+        for esineen_nimi in esineet:
+            if isinstance(esineen_nimi, str):
+                pelaaja.kerää_esine(Esine(esineen_nimi))
 
     return pelaaja
 
 
-def luo_peli():
+# Kysytään, minkä reitin pelaaja valitsee.
+def valitse_reitti():
+    while True:
+        print("\nMihin lähdet lentokentältä?")
+        print("1. Tutkijan mökki")
+        print("2. Laboratorio")
+        print("3. Majakka")
 
-    radiopuhelin = Esine("Radiopuhelin")
-    kartta = Esine("Kartta")
-    taskulamppu = Esine("Taskulamppu")
-    kompassi = Esine("Kompassi")
+        valinta = input("Valitse 1, 2 tai 3: ").strip()
+        if valinta == "1" or valinta == "2" or valinta == "3":
+            return valinta
+        print("Virheellinen valinta.")
 
-    avain = Esine("Avain")
-    paivakirja = Esine("Päiväkirja")
-    paristot = Esine("Paristot")
 
-    tutkimusraportti = Esine("Tutkimusraportti")
-    sulake = Esine("Sulake")
-    laboratorion_avain = Esine("Laboratorion avain")
+# Kysytään yksinkertainen valinta reitin aikana.
+def kysy_kaksi():
+    while True:
+        valinta = input("Valitse 1 tai 2: ").strip()
+        if valinta == "1" or valinta == "2":
+            return valinta
+        print("Virheellinen valinta.")
 
-    radiolaite = Esine("Vanha radiolaite")
-    tutkijan_muistiinpano = Esine("Tutkijan muistiinpano")
+
+# Ensimmäinen reitti: tutkijan mökki.
+def mokin_reitti(pelaaja, mokki):
+    pelaaja.liiku(mokki)
+    print("\nMökissä näet pöydän ja kirjahyllyn.")
+    print("1. Tutki pöytää")
+    print("2. Tutki kirjahyllyä")
+    valinta = kysy_kaksi()
+
+    if valinta == "1":
+        print("\nPöydällä on tutkijan päiväkirja.")
+    else:
+        print("\nKirjahyllystä löytyy tutkijan päiväkirja.")
+
+    if not pelaaja.onko_esine("Päiväkirja"):
+        mokki.lisää_esine(Esine("Päiväkirja"))
+        pelaaja.kerää_esine(mokki.poimi_esine(1))
+
+    print("Päiväkirjassa kerrotaan, että tutkija lähti majakalle.")
+    print("Päätät seurata vihjettä.")
+    return "Tutkijan mökin kautta"
+
+
+# Toinen reitti: laboratorio.
+def laboratorion_reitti(pelaaja, laboratorio):
+    pelaaja.liiku(laboratorio)
+    print("\nLaboratoriossa näet tietokoneen ja tutkimuspöydän.")
+    print("1. Tutki tietokonetta")
+    print("2. Tutki tutkimuspöytää")
+    valinta = kysy_kaksi()
+
+    if valinta == "1":
+        print("\nTietokoneelta löytyy tutkimusraportti.")
+    else:
+        print("\nTutkimuspöydältä löytyy tutkimusraportti.")
+
+    if not pelaaja.onko_esine("Tutkimusraportti"):
+        laboratorio.lisää_esine(Esine("Tutkimusraportti"))
+        pelaaja.kerää_esine(laboratorio.poimi_esine(1))
+
+    print("Raportissa kerrotaan saaren maaperän lämpöenergiasta.")
+    print("Viimeinen merkintä johdattaa majakalle.")
+    return "Laboratorion kautta"
+
+
+# Kolmas reitti: suoraan majakalle.
+def majakan_reitti(pelaaja, majakka):
+    pelaaja.liiku(majakka)
+    print("\nMajakan eteisessä on vanha radiolaite ja ilmoitustaulu.")
+    print("1. Tutki radiolaitetta")
+    print("2. Tutki ilmoitustaulua")
+    valinta = kysy_kaksi()
+
+    if valinta == "1":
+        print("\nRadiolaitteesta kuuluu tutkijan heikko ääni.")
+    else:
+        print("\nIlmoitustaulussa on tutkijan jättämä viesti.")
+
+    if not pelaaja.onko_esine("Tutkijan muistiinpano"):
+        majakka.lisää_esine(Esine("Tutkijan muistiinpano"))
+        pelaaja.kerää_esine(majakka.poimi_esine(1))
+
+    print("Vihjeen perusteella tutkija saattaa olla majakan kellarissa.")
+    return "Majakan kautta"
+
+
+# Toinen vaihe: kaikki reitit johtavat majakalle.
+def tutki_majakkaa(pelaaja, majakka):
+    if pelaaja.sijainti.nimi != "Majakka":
+        pelaaja.liiku(majakka)
+
+    print("\n--- MAJAKAN TUTKIMINEN ---")
+    print("Majakka on hiljainen, mutta jostain kuuluu kolinaa.")
+    print("1. Tutki eteistä")
+    print("2. Tutki portaikkoa")
+    valinta = kysy_kaksi()
+
+    if valinta == "1":
+        print("\nEteisestä löytyy taskulamppu.")
+    else:
+        print("\nPortaiden juurelta löytyy taskulamppu.")
+
+    if not pelaaja.onko_esine("Taskulamppu"):
+        majakka.lisää_esine(Esine("Taskulamppu"))
+        pelaaja.kerää_esine(majakka.poimi_esine(1))
+
+    print("Taskulampun valossa näet kellariin johtavan oven.")
+
+
+# Kolmas vaihe: etsitään tutkija majakan kellarista.
+def tutki_kellaria():
+    print("\n--- MAJAKAN KELLARI ---")
+    print("Avaat kellarin oven ja laskeudut portaita alas.")
+    print("1. Tutki työpöytää")
+    print("2. Seuraa kellarista kuuluvaa ääntä")
+    valinta = kysy_kaksi()
+
+    if valinta == "1":
+        print("\nTyöpöydällä on papereita energiantutkimuksesta.")
+        print("Pöydän takaa kuuluu tutkijan ääni.")
+    else:
+        print("\nSeuraat ääntä kellarin takaosaan.")
+
+    print("\nLöydät kadonneen tutkijan! Hän on kunnossa.")
+
+
+# Loppuratkaisu etenee kolmessa lyhyessä osassa.
+def pelin_loppu(pelaaja, reitti, lentokentta):
+    print("\n--- TUTKIJAN LÖYTÖ ---")
+    print("Tutkija kertoo löytäneensä saarelta lämpöenergiaa,")
+    print("jota voitaisiin käyttää uusiutuvana energiana.")
+
+    print("\nMitä haluat kysyä tutkijalta?")
+    print("1. Mihin energiaa voisi käyttää?")
+    print("2. Voiko sen käyttäminen vahingoittaa luontoa?")
+    valinta = kysy_kaksi()
+
+    if valinta == "1":
+        print("\nTutkija: Sillä voitaisiin tuottaa lämpöä ja sähköä.")
+    else:
+        print("\nTutkija: Mahdolliset ympäristövaikutukset täytyy tutkia.")
+
+    print("\n--- KESTÄVÄ KEHITYS ---")
+    print("Tutkija aikoo selvittää, miten energiaa voisi hyödyntää")
+    print("ilman että saaren luonto ja eläimet kärsivät.")
+
+    print("\n--- PALUU LENTOKENTÄLLE ---")
+    print("Autat tutkijan turvallisesti takaisin lentokentälle.")
+    pelaaja.liiku(lentokentta)
+
+    print("\n==========================")
+    print("         PELI LÄPI!")
+    print("==========================")
+    print(f"Ratkaisit pelin: {reitti}.")
+    tallenna_peli(pelaaja, reitti)
+
+
+# Aloitetaan peli ja edetään valitun reitin mukaan.
+def pelaa():
+    lue_intro()
+    lue_ohjeet()
 
     lentokentta = Huone("Lentokenttä")
     mokki = Huone("Tutkijan mökki")
     laboratorio = Huone("Laboratorio")
     majakka = Huone("Majakka")
 
-    lentokentta.lisää_esine(radiopuhelin)
-    lentokentta.lisää_esine(kartta)
-    lentokentta.lisää_esine(taskulamppu)
-    lentokentta.lisää_esine(kompassi)
+    nimi = kysy_nimi()
+    pelaaja = lataa_peli(nimi, lentokentta)
 
-    mokki.lisää_esine(avain)
-    mokki.lisää_esine(paivakirja)
-    mokki.lisää_esine(paristot)
+    if pelaaja is None:
+        ika = kysy_ika()
+        if ika is None:
+            print("Kirjattu ulos pelistä.")
+            return False
 
-    laboratorio.lisää_esine(tutkimusraportti)
-    laboratorio.lisää_esine(sulake)
-    laboratorio.lisää_esine(laboratorion_avain)
+        pelaaja = Pelaaja(nimi=nimi, sijainti=lentokentta, ika=ika)
 
-    majakka.lisää_esine(radiolaite)
-    majakka.lisää_esine(tutkijan_muistiinpano)
-
-    nimi = input("\nMikä on nimesi?: ")
-
-    vanha_peli = lataa_peli(
-        nimi,
-        lentokentta,
-        mokki,
-        laboratorio,
-        majakka
-    )
-
-    if vanha_peli is not None:
-        return vanha_peli, mokki, laboratorio, majakka
-
-    pelaaja = Pelaaja(nimi, lentokentta)
-
-    return pelaaja, mokki, laboratorio, majakka
-
-
-def ota_esine(pelaaja):
-
-    huone = pelaaja.sijainti
-
-    if len(huone.esineet) == 0:
-        print("\nTässä paikassa ei ole esineitä.")
-        return
-
-    huone.näytä_esineet()
-
-    try:
-        valinta = int(input("Minkä esineen haluat ottaa? "))
-
-        esine = huone.poimi_esine(valinta)
-
-        if esine is not None:
-            pelaaja.kerää_esine(esine)
-
-    except ValueError:
-        print("Anna numero.")
-
-
-def tutki_esine(esine):
-
-    if esine.nimi == "Radiopuhelin":
-
-        print("\nRadiopuhelin näyttää toimivan.")
-        print("Sillä voisi ottaa yhteyttä ulkopuoliseen maailmaan.")
-
-    elif esine.nimi == "Kartta":
-
-        print("\nKartta näyttää saaren tärkeimmät paikat.")
-        print("Karttaan on merkitty lentokenttä,")
-        print("mökki, laboratorio ja majakka.")
-
-    elif esine.nimi == "Taskulamppu":
-
-        print("\nTaskulamppu toimii.")
-        print("Siitä voi olla hyötyä pimeissä paikoissa.")
-
-    elif esine.nimi == "Kompassi":
-
-        print("\nKompassi toimii normaalisti.")
-        print("Sen avulla voi suunnistaa saarella.")
-
-    elif esine.nimi == "Avain":
-
-        print("\nVanha metallinen avain.")
-        print("Et tiedä vielä, mihin se sopii.")
-
-    elif esine.nimi == "Päiväkirja":
-
-        print("\nTutkijan päiväkirja.")
-        print("Viimeisessä merkinnässä lukee:")
-        print('"Olen löytänyt jotain uskomatonta.')
-        print('Minun täytyy tutkia asiaa majakalla."')
-
-    elif esine.nimi == "Paristot":
-
-        print("\nParistot näyttävät vielä käyttökelpoisilta.")
-
-    elif esine.nimi == "Tutkimusraportti":
-
-        print("\nTutkimusraportissa kerrotaan")
-        print("oudosta energialähteestä saaren alla.")
-        print("Tutkija uskoo, että se liittyy majakkaan.")
-
-    elif esine.nimi == "Sulake":
-
-        print("\nVanha sulake.")
-        print("Se kuuluu laboratorion sähköjärjestelmään.")
-
-    elif esine.nimi == "Laboratorion avain":
-
-        print("\nAvain, jossa lukee:")
-        print('"Laboratorio B".')
-
-    elif esine.nimi == "Vanha radiolaite":
-
-        print("\nVanha radiolaite.")
-        print("Se näyttää olevan todella vanha.")
-
-    elif esine.nimi == "Tutkijan muistiinpano":
-
-        print("\nTutkijan muistiinpano:")
-        print('"Jos löydät tämän,')
-        print('olen todennäköisesti majakan kellarissa."')
-
-    else:
-
-        print("\nEt löydä esineestä mitään erityistä.")
-
-
-def tutki_paikka(pelaaja):
-
-    huone = pelaaja.sijainti
-
-    if huone.nimi == "Lentokenttä":
-
-        print("\n--- LENTOKENTTÄ ---")
-        print("Mitä haluat tutkia?")
-        print("1. Lentokone")
-        print("2. Lähtöaula")
-        print("3. Radiotorni")
-        print("4. Peruuta")
-
-        valinta = input("Valitse: ")
-
-        if valinta == "1":
-
-            print("\nLentokone on tyhjä.")
-            print("Ohjaajan paikalla on paperilappu.")
-            print('Lapussa lukee:')
-            print('"Jos tutkijaa ei löydy, tarkista majakka."')
-
-        elif valinta == "2":
-
-            print("\nLähtöaulassa on vanha ilmoitustaulu.")
-            print("Sen kartassa näkyy majakka.")
-
-        elif valinta == "3":
-
-            print("\nRadiotorni näyttää olevan pois käytöstä.")
-
-        elif valinta == "4":
-
-            print("Päätit olla tutkimatta tätä paikkaa.")
-
-        else:
-
-            print("Virheellinen valinta.")
-
-    elif huone.nimi == "Tutkijan mökki":
-
-        print("\n--- TUTKIJAN MÖKKI ---")
-        print("Mitä haluat tutkia?")
-        print("1. Työpöytä")
-        print("2. Kirjahylly")
-        print("3. Makuuhuone")
-        print("4. Peruuta")
-
-        valinta = input("Valitse: ")
-
-        if valinta == "1":
-
-            print("\nTyöpöytä on täynnä papereita.")
-            print("Yhdessä paperissa lukee:")
-            print('"Tutkimukseni ovat vieneet minut majakalle."')
-
-        elif valinta == "2":
-
-            print("\nKirjahyllyssä on kirjoja saaren historiasta.")
-            print("Yksi kirja kertoo vanhasta majakasta.")
-
-        elif valinta == "3":
-
-            print("\nMakuuhuone on tyhjä.")
-            print("Tutkija ei ole ollut täällä vähään aikaan.")
-
-        elif valinta == "4":
-
-            print("Päätit olla tutkimatta tätä paikkaa.")
-
-        else:
-
-            print("Virheellinen valinta.")
-
-    elif huone.nimi == "Laboratorio":
-
-        print("\n--- LABORATORIO ---")
-        print("Mitä haluat tutkia?")
-        print("1. Tietokone")
-        print("2. Sähkökaappi")
-        print("3. Tutkimuspöytä")
-        print("4. Peruuta")
-
-        valinta = input("Valitse: ")
-
-        if valinta == "1":
-
-            print("\nTietokoneella on tutkijan tutkimusraportti.")
-            print("Raportissa kerrotaan uudesta")
-            print("energialähteestä majakan alla.")
-            print("Tutkija on kirjoittanut:")
-            print('"Tämä voi olla elämäni tärkein löytö."')
-
-        elif valinta == "2":
-
-            print("\nSähkökaappi näyttää vanhalta.")
-            print("Sen ympärillä on paljon johtoja.")
-
-        elif valinta == "3":
-
-            print("\nTutkimuspöydällä on erilaisia mittalaitteita.")
-            print("Kaikki näyttää liittyvän majakan tutkimiseen.")
-
-        elif valinta == "4":
-
-            print("Päätit olla tutkimatta tätä paikkaa.")
-
-        else:
-
-            print("Virheellinen valinta.")
-
-    elif huone.nimi == "Majakka":
-
-        print("\n--- MAJAKKA ---")
-        print("Mitä haluat tutkia?")
-        print("1. Radiolaite")
-        print("2. Majakan yläosa")
-        print("3. Kellari")
-        print("4. Peruuta")
-
-        valinta = input("Valitse: ")
-
-        if valinta == "1":
-
-            print("\nVanha radiolaite on pölyinen.")
-            print("Sen vieressä on pieni paperilappu.")
-            print('Lapussa lukee:')
-            print('"Olen lähellä löytöäni."')
-
-        elif valinta == "2":
-
-            print("\nMajakan valo pyörii hitaasti.")
-            print("Ulos katsoessasi näet koko saaren.")
-
-        elif valinta == "3":
-
-            print("\nLaskeudut majakan kellariin.")
-            print("Kellari on pimeä.")
-            print("Perältä kuuluu ääni.")
-
-            print("\nLöydät tutkijan!")
-            print("Hän näyttää väsyneeltä, mutta on kunnossa.")
-
-            print("\nTutkija kertoo:")
-            print('"Löysin täältä jotain uskomatonta."')
-            print('"Majakan alla on uusi luonnollinen')
-            print('energialähde, jota ei ole koskaan ennen löydetty."')
-
-            print("\nTutkija kertoo tutkineensa löytöä")
-            print("jo useita päiviä.")
-
-            print("Hän pyytää sinua auttamaan")
-            print("hänet takaisin lentokentälle.")
-
-            print("\n==============================")
-            print("        PELI LÄPI!")
-            print("==============================")
-
-            print("\nLöysit tutkijan ja hänen uuden löytönsä.")
-            print("Tehtäväsi on onnistuneesti suoritettu.")
-
-            return True
-
-        elif valinta == "4":
-
-            print("Päätit olla tutkimatta tätä paikkaa.")
-
-        else:
-
-            print("Virheellinen valinta.")
-
-    return False
-
-
-def liiku(pelaaja, mokki, laboratorio, majakka):
-
-    print("\n--- MINNE HALUAT MENNÄ? ---")
-    print("1. Tutkijan mökki")
-    print("2. Laboratorio")
-    print("3. Majakka")
-    print("4. Peruuta")
-
-    valinta = input("Valitse: ")
+    valinta = valitse_reitti()
 
     if valinta == "1":
-
-        pelaaja.liiku(mokki)
-
+        reitti = mokin_reitti(pelaaja, mokki)
     elif valinta == "2":
-
-        pelaaja.liiku(laboratorio)
-
-    elif valinta == "3":
-
-        pelaaja.liiku(majakka)
-
-    elif valinta == "4":
-
-        print("Et liiku mihinkään.")
-
+        reitti = laboratorion_reitti(pelaaja, laboratorio)
     else:
+        reitti = majakan_reitti(pelaaja, majakka)
 
-        print("Virheellinen valinta.")
-
-
-def pelivalikko():
-
-    print("\n--- PELIVALIKKO ---")
-    print("1. Tutki paikkaa")
-    print("2. Liiku")
-    print("3. Näytä esineet")
-    print("4. Tallenna peli")
-    print("5. Palaa päävalikkoon")
+    tutki_majakkaa(pelaaja, majakka)
+    tutki_kellaria()
+    pelin_loppu(pelaaja, reitti, lentokentta)
 
 
-def pelaa():
-
-    lue_intro()
-    lue_ohjeet()
-
-    pelaaja, mokki, laboratorio, majakka = luo_peli()
-
-    print("\n==============================")
-    print("       PELI ALKAA!")
-    print("==============================")
-
-    print(f"\nTervetuloa, {pelaaja.nimi}!")
-
-    print("Tehtäväsi on löytää kadonnut tutkija.")
-
-    while True:
-
-        pelivalikko()
-
-        valinta = input("\nValitse toiminto: ")
-
-        if valinta == "1":
-
-            peli_loppui = tutki_paikka(pelaaja)
-
-            if peli_loppui:
-                break
-
-            if len(pelaaja.sijainti.esineet) > 0:
-
-                print("\nPaikassa on myös esineitä.")
-
-                vastaus = input(
-                    "Haluatko katsoa esineitä? (k/e): "
-                )
-
-                if vastaus.lower() == "k":
-
-                    ota_esine(pelaaja)
-
-        elif valinta == "2":
-
-            liiku(
-                pelaaja,
-                mokki,
-                laboratorio,
-                majakka
-            )
-
-        elif valinta == "3":
-
-            pelaaja.näytä_esineet()
-
-            if len(pelaaja.esineet) > 0:
-
-                vastaus = input(
-                    "Haluatko tutkia jotakin esinettä? (k/e): "
-                )
-
-                if vastaus.lower() == "k":
-
-                    try:
-
-                        numero = int(
-                            input("Minkä esineen haluat tutkia? ")
-                        )
-
-                        if 1 <= numero <= len(pelaaja.esineet):
-
-                            esine = pelaaja.esineet[numero - 1]
-
-                            tutki_esine(esine)
-
-                        else:
-
-                            print("Virheellinen numero.")
-
-                    except ValueError:
-
-                        print("Anna numero.")
-
-        elif valinta == "4":
-
-            tallenna_peli(pelaaja)
-
-        elif valinta == "5":
-
-            print("\nPalaat päävalikkoon.")
-
-            break
-
-        else:
-
-            print("Virheellinen valinta.")
-
-
+# Päävalikossa voi pelata, lukea ohjeet tai lopettaa.
 def paavalikko():
-
     while True:
-
-        print("\n")
-        print("==============================")
-        print("       KADONNUT TUTKIJA")
-        print("==============================")
-
+        print("\n--- KADONNUT TUTKIJA ---")
         print("1. Pelaa")
         print("2. Ohjeet")
-        print("3. Lopeta")
+        print("3. Lopeta peli")
 
-        valinta = input("\nValitse: ")
-
+        valinta = input("Valitse: ").strip()
         if valinta == "1":
-
-            pelaa()
-
+            if pelaa() is False:
+                break
         elif valinta == "2":
-
             print("\n--- OHJEET ---")
             lue_ohjeet()
-
         elif valinta == "3":
-
-            print("\nPeli lopetetaan.")
             print("Kiitos pelaamisesta!")
-
             break
-
         else:
-
-            print("\nVirheellinen valinta.")
+            print("Virheellinen valinta.")
 
 
 paavalikko()
